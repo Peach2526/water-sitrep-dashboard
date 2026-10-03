@@ -1,0 +1,13 @@
+{
+  "name": "water-dashboard-mvp",
+  "version": "0.1.0",
+  "description": "MVP dashboard for Chao Phraya and Bangkok water situation using public data sources.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check src/services/dashboard.js && node --check src/sources/thaiwater.js && node --check src/sources/thaiwaterDailyReport.js && node --check src/sources/thaiwaterTide.js && node --check src/sources/popnix.js && node --check src/sources/ddsBangkok.js && node --check src/sources/tmd.js && node --check src/sources/ddpm.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
