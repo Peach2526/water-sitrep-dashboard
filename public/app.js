@@ -155,7 +155,7 @@ function buildDischargeChart(rows) {
   };
 }
 
-const DISCHARGE_COLORS = ["#0f766e", "#b45309", "#2563eb", "#7c3aed"];
+const DISCHARGE_COLORS = ["#0f766e", "#b45309", "#2563eb", "#7c3aed", "#dc2626", "#64748b"];
 
 function renderDischargeChart(chart) {
   const width = 520;

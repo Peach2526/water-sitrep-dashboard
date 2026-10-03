@@ -8,8 +8,10 @@ const START_DAY = 25;
 const HISTORY_STATIONS = {
   "Ct.19": "แม่น้ำสะแกกรัง",
   "C.13": "เขื่อนเจ้าพระยา",
-  "S.28": "แม่น้ำป่าสัก",
-  "C.29": "บางไทร"
+  "S.5": "แม่น้ำป่าสัก",
+  "C29A": "บางไทร",
+  "ปตร.พลเทพ": "ปตร.พลเทพ",
+  "ปตร.มโนรมย์": "ปตร.มโนรมย์"
 };
 const FROZEN_HISTORY = {
   "Ct.19": [
@@ -20,11 +22,7 @@ const FROZEN_HISTORY = {
     ["2026-09-25", 1750, 13.89], ["2026-09-26", 1850, 14.21], ["2026-09-27", 1950, 14.52], ["2026-09-28", 1950, 14.52],
     ["2026-09-29", 2000, 14.67], ["2026-09-30", 2200, 15.22], ["2026-10-01", 2300, 15.46], ["2026-10-02", 2500, 15.93]
   ],
-  "S.28": [
-    ["2026-09-25", 34, 18.41], ["2026-09-26", 70, 19.28], ["2026-09-27", 64, 19.16], ["2026-09-28", 58, 19.02],
-    ["2026-09-29", 25, 18.1], ["2026-09-30", 84, 19.59], ["2026-10-01", 184, 21.35], ["2026-10-02", 354, 24.08]
-  ],
-  "C.29": [
+  "C29A": [
     ["2026-09-25", 1693, null, "https://www.rid.go.th/th/water-situation/28855"],
     ["2026-09-26", 1748, null, "https://www.rid.go.th/th/water-situation/28861"],
     ["2026-09-27", 1895, null, "https://www.rid.go.th/th/water-situation/28867"],
@@ -41,8 +39,7 @@ export async function collectThaiWaterDailyReportHistory() {
   const historyByStation = Object.fromEntries(Object.keys(HISTORY_STATIONS).map((stationId) => [stationId, []]));
   seedFrozenHistory(historyByStation, dates);
 
-  const frozenDates = new Set(Object.values(FROZEN_HISTORY).flatMap((rows) => rows.map(([date]) => date)));
-  const fetchDates = dates.filter((date) => !frozenDates.has(date));
+  const fetchDates = dates.filter((date) => Object.values(historyByStation).some((rows) => !rows.some((row) => row.date === date)));
   const results = await Promise.all(fetchDates.map((date) => fetchReportDate(date)));
   let latestSourceUpdate = latestHistoryUpdate(historyByStation);
 
@@ -85,7 +82,7 @@ function seedFrozenHistory(historyByStation, dates) {
   for (const [stationId, rows] of Object.entries(FROZEN_HISTORY)) {
     for (const [date, flowRate, waterLevel, sourceUrl] of rows) {
       if (!requestedDates.has(date)) continue;
-      const isRid = stationId === "C.29";
+      const isRid = stationId === "C29A";
       historyByStation[stationId].push({
         date,
         flow_rate: flowRate,
@@ -105,6 +102,7 @@ function upsertHistoryRow(rows, row) {
     rows.push(row);
     return;
   }
+  if (current.locked) return;
   if (Number.isFinite(row.flow_rate) || Number.isFinite(row.water_level)) {
     Object.assign(current, row);
   }
@@ -164,13 +162,15 @@ function parseReport(html) {
 function stationIdFromCell(cell) {
   if (cell.includes("(Ct.19)")) return "Ct.19";
   if (cell.includes("(C.13)")) return "C.13";
-  if (cell.includes("(S.28)")) return "S.28";
-  if (cell.includes("(C.29)") || cell.includes("(C.29A)") || cell.includes("บางไทร ปริมาณน้ำเฉลี่ยรายวัน")) return "C.29";
+  if (cell.includes("(S.5)")) return "S.5";
+  if (cell.includes("(C.29)") || cell.includes("(C.29A)") || cell.includes("บางไทร ปริมาณน้ำเฉลี่ยรายวัน")) return "C29A";
+  if (cell.includes("ปตร.พลเทพ")) return "ปตร.พลเทพ";
+  if (cell.includes("ปตร.มโนรมย์")) return "ปตร.มโนรมย์";
   return null;
 }
 
 function isDailyReport(text) {
-  return text.length > 10000 && (text.includes("(C.13)") || text.includes("(Ct.19)") || text.includes("(S.28)"));
+  return text.length > 10000 && (text.includes("(C.13)") || text.includes("(Ct.19)") || text.includes("(S.5)"));
 }
 
 function cleanCell(value) {

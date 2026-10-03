@@ -2173,7 +2173,7 @@ td {
 
 .discharge-legend {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px 7px;
 }
 
@@ -2200,7 +2200,7 @@ td {
 
 .discharge-legend-item strong {
   color: var(--text);
-  font-size: 9px;
+  font-size: 8.4px;
   line-height: 1.05;
 }
 
@@ -2230,7 +2230,7 @@ td {
   }
 
   .discharge-legend-item strong {
-    font-size: 6px;
+    font-size: 5.8px;
   }
 
   .discharge-legend-item small {

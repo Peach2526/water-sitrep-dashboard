@@ -246,7 +246,7 @@ function buildKeyDischarges(stations, dischargeHistory = {}) {
   return [
     {
       id: "sakae-krang",
-      title: "แม่น้ำสะแกกรัง",
+      title: "Ct.19 แม่น้ำสะแกกรัง",
       description: "เลือกสถานีในลุ่มน้ำสะแกกรังที่มีค่าอัตราการไหล/ระบายล่าสุด",
       station: buildDailyReportStation("Ct.19", "สถานีบ้านดอนใหญ่", "อุทัยธานี", "เมืองอุทัยธานี", dischargeHistory["Ct.19"] ?? []) ?? findBestStation(stations, [
         { id: "Ct.19", weight: 9 },
@@ -259,7 +259,7 @@ function buildKeyDischarges(stations, dischargeHistory = {}) {
     },
     {
       id: "chao-phraya-dam",
-      title: "เขื่อนเจ้าพระยา",
+      title: "C.13 เขื่อนเจ้าพระยา",
       description: "อัตราระบายท้ายเขื่อนเจ้าพระยา",
       station: buildDailyReportStation("C.13", "ท้ายเขื่อนเจ้าพระยา", "ชัยนาท", "สรรพยา", dischargeHistory["C.13"] ?? []) ?? findBestStation(stations, [
         { id: "C.13", weight: 10 },
@@ -270,24 +270,47 @@ function buildKeyDischarges(stations, dischargeHistory = {}) {
     },
     {
       id: "pasak",
-      title: "แม่น้ำป่าสัก",
-      description: "ใช้จุดท้ายเขื่อน/สถานีหลักบนแม่น้ำป่าสักที่มีค่า discharge",
-      station: buildDailyReportStation("S.28", "ท้ายเขื่อนป่าสักชลสิทธิ์", "ลพบุรี", "พัฒนานิคม", dischargeHistory["S.28"] ?? []) ?? findBestStation(stations, [
-        { id: "S.28", weight: 10 },
-        { text: "ท้ายเขื่อนป่าสักชลสิทธิ์", weight: 9 },
-        { id: "S.26", weight: 5 },
-        { text: "ท้ายเขื่อนพระรามหก", weight: 5 },
-        { province: "สระบุรี", weight: 2 },
-        { province: "ลพบุรี", weight: 2 }
+      title: "S.5 แม่น้ำป่าสัก",
+      description: "สถานี S.5 บริเวณพระนครศรีอยุธยาในรายงานน้ำท่า",
+      station: buildDailyReportStation("S.5", "รพ.ปัจมาฯ", "พระนครศรีอยุธยา", "พระนครศรีอยุธยา", dischargeHistory["S.5"] ?? []) ?? findBestStation(stations, [
+        { id: "S.5", weight: 10 },
+        { text: "สะพานปรีดี", weight: 8 },
+        { text: "ปัจม", weight: 7 },
+        { text: "ป่าสัก", weight: 5 },
+        { province: "พระนครศรีอยุธยา", weight: 2 }
       ]),
-      history: dischargeHistory["S.28"] ?? []
+      history: dischargeHistory["S.5"] ?? []
     },
     {
       id: "bang-sai",
-      title: "บางไทร",
-      description: "สถานีบางไทร (C.29) จากรายงานน้ำท่า",
-      station: buildDailyReportStation("C.29", "สถานีบางไทร", "พระนครศรีอยุธยา", "บางไทร", dischargeHistory["C.29"] ?? []),
-      history: dischargeHistory["C.29"] ?? []
+      title: "C29A บางไทร",
+      description: "สถานีบางไทรจากรายงานน้ำท่า",
+      station: buildDailyReportStation("C29A", "สถานีบางไทร", "พระนครศรีอยุธยา", "บางไทร", dischargeHistory["C29A"] ?? []),
+      history: dischargeHistory["C29A"] ?? []
+    },
+    {
+      id: "pholthep-regulator",
+      title: "ปตร.พลเทพ",
+      description: "ประตูระบายน้ำพลเทพ",
+      station: buildDailyReportStation("ปตร.พลเทพ", "ปตร.พลเทพ", "ชัยนาท", "เมืองชัยนาท", dischargeHistory["ปตร.พลเทพ"] ?? []) ?? findBestStation(stations, [
+        { id: "ridtele_TTC01", weight: 10 },
+        { id: "ridtele_T.PholarhepRegulator", weight: 9 },
+        { text: "ปตร.พลเทพ", weight: 8 },
+        { text: "Pholarhep", weight: 6 }
+      ]),
+      history: dischargeHistory["ปตร.พลเทพ"] ?? []
+    },
+    {
+      id: "manorom-regulator",
+      title: "ปตร.มโนรมย์",
+      description: "ประตูระบายน้ำมโนรมย์",
+      station: buildDailyReportStation("ปตร.มโนรมย์", "ปตร.มโนรมย์", "ชัยนาท", "มโนรมย์", dischargeHistory["ปตร.มโนรมย์"] ?? []) ?? findBestStation(stations, [
+        { id: "CPY003", weight: 10 },
+        { id: "ATG021", weight: 7 },
+        { text: "ปตร.มโนรมย์", weight: 8 },
+        { text: "เหนือ ปตร.มโนรมย์", weight: 6 }
+      ]),
+      history: dischargeHistory["ปตร.มโนรมย์"] ?? []
     }
   ];
 }
@@ -424,6 +447,7 @@ function scoreByRules(station, rules) {
     if (rule.text && String(station.station_name ?? "").includes(rule.text)) score += rule.weight;
     if (rule.province && station.province === rule.province) score += rule.weight;
   }
+  if (score <= 0) return 0;
   if (station.source_name === "สถาบันสารสนเทศทรัพยากรน้ำ") score += 2;
   if (station.status === "critical") score += 1;
   return score;
