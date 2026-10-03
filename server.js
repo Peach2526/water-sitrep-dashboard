@@ -22,7 +22,7 @@ const server = createServer(async (request, response) => {
     const url = new URL(request.url, `http://${request.headers.host}`);
 
     if (url.pathname === "/api/dashboard") {
-      const force = url.searchParams.get("force") === "1" && process.env.ALLOW_FORCE_REFRESH === "true";
+      const force = url.searchParams.get("force") === "1";
       const data = await getDashboardData({ force });
       sendJson(response, 200, data);
       return;

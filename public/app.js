@@ -16,17 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add("pdf-export-hq");
     }
   }
-  document.getElementById("refreshButton").addEventListener("click", () => loadDashboard());
+  document.getElementById("refreshButton").addEventListener("click", () => loadDashboard({ force: true }));
   loadDashboard();
 });
 
-async function loadDashboard() {
+async function loadDashboard({ force = false } = {}) {
   const button = document.getElementById("refreshButton");
   button.disabled = true;
   button.innerHTML = '<span aria-hidden="true">↻</span> กำลังโหลด';
 
   try {
-    const response = await fetch("/api/dashboard", { cache: "no-store" });
+    const response = await fetch(`/api/dashboard${force ? "?force=1" : ""}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     state.data = await response.json();
     renderDashboard();
