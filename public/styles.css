@@ -573,6 +573,23 @@ body.pdf-export-hq main {
   margin-top: 5px;
 }
 
+.province-area-summary {
+  margin-top: 8px;
+  padding: 8px 9px 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.province-area-summary ul {
+  columns: 2;
+  column-gap: 16px;
+}
+
+.province-area-summary li {
+  break-inside: avoid;
+}
+
 .trend-mark {
   display: inline-flex;
   width: 14px;
@@ -1878,6 +1895,16 @@ td {
 /* Screen compaction for executive A4 preview */
 .province-map-composite .province-status-map svg {
   height: 290px;
+}
+
+.province-area-summary {
+  margin-top: 7px;
+  padding: 7px 8px;
+}
+
+.province-area-summary ul {
+  columns: 2;
+  column-gap: 12px;
 }
 
 .weather-panel .weather-overall p {

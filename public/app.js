@@ -59,8 +59,7 @@ function renderProvinceSituation() {
   setText("provincePanelTitle", `จว.ประสบอุทกภัย ${totalAffected} จังหวัด`);
   setText("provinceMapSummary", `ประสบอุทกภัย ${totalAffected} จังหวัด · วิกฤต ${critical.length} จังหวัด · เฝ้าระวัง ${watch.length} จังหวัด`);
   renderProvinceStatusMap(critical, watch);
-  document.getElementById("provinceCriticalAreas").innerHTML = renderProvinceAreaList(critical, "ไม่พบจังหวัดระดับวิกฤต");
-  document.getElementById("provinceWatchAreas").innerHTML = renderProvinceAreaList(watch, "ไม่พบจังหวัดระดับเฝ้าระวัง");
+  document.getElementById("provinceAffectedAreas").innerHTML = renderProvinceAreaList([...critical, ...watch], "ไม่พบจังหวัดประสบอุทกภัย");
   renderImpactSummary(summary?.impact_summary);
 }
 
