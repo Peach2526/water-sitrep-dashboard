@@ -2659,3 +2659,57 @@ td {
     font-size: 6.8px;
   }
 }
+
+/* Province panel layout: map first, details and flow chart below */
+.province-map-composite {
+  grid-template-columns: 1fr;
+}
+
+.province-map-composite .province-status-map svg {
+  height: min(62vh, 560px);
+}
+
+.province-area-summary .source-foot {
+  font-size: 8px;
+  line-height: 1.12;
+}
+
+.discharge-after-provinces {
+  margin-top: 7px;
+  box-shadow: none;
+}
+
+.discharge-after-provinces .source-foot {
+  font-size: 8px;
+  line-height: 1.12;
+}
+
+.discharge-legend {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .province-map-composite .province-status-map svg {
+    height: min(76vh, 640px);
+  }
+
+  .province-area-summary .source-foot,
+  .discharge-after-provinces .source-foot {
+    font-size: 9px;
+  }
+}
+
+@media print {
+  .province-map-composite {
+    grid-template-columns: 1fr;
+  }
+
+  .province-map-composite .province-status-map svg {
+    height: 78mm;
+  }
+
+  .province-area-summary .source-foot,
+  .discharge-after-provinces .source-foot {
+    font-size: 5.8px;
+  }
+}

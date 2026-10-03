@@ -287,30 +287,6 @@ function buildKeyDischarges(stations, dischargeHistory = {}) {
       description: "สถานีบางไทรจากรายงานน้ำท่า",
       station: buildDailyReportStation("C29A", "สถานีบางไทร", "พระนครศรีอยุธยา", "บางไทร", dischargeHistory["C29A"] ?? []),
       history: dischargeHistory["C29A"] ?? []
-    },
-    {
-      id: "pholthep-regulator",
-      title: "ปตร.พลเทพ",
-      description: "ประตูระบายน้ำพลเทพ",
-      station: buildDailyReportStation("ปตร.พลเทพ", "ปตร.พลเทพ", "ชัยนาท", "เมืองชัยนาท", dischargeHistory["ปตร.พลเทพ"] ?? []) ?? findBestStation(stations, [
-        { id: "ridtele_TTC01", weight: 10 },
-        { id: "ridtele_T.PholarhepRegulator", weight: 9 },
-        { text: "ปตร.พลเทพ", weight: 8 },
-        { text: "Pholarhep", weight: 6 }
-      ]),
-      history: dischargeHistory["ปตร.พลเทพ"] ?? []
-    },
-    {
-      id: "manorom-regulator",
-      title: "ปตร.มโนรมย์",
-      description: "ประตูระบายน้ำมโนรมย์",
-      station: buildDailyReportStation("ปตร.มโนรมย์", "ปตร.มโนรมย์", "ชัยนาท", "มโนรมย์", dischargeHistory["ปตร.มโนรมย์"] ?? []) ?? findBestStation(stations, [
-        { id: "CPY003", weight: 10 },
-        { id: "ATG021", weight: 7 },
-        { text: "ปตร.มโนรมย์", weight: 8 },
-        { text: "เหนือ ปตร.มโนรมย์", weight: 6 }
-      ]),
-      history: dischargeHistory["ปตร.มโนรมย์"] ?? []
     }
   ];
 }

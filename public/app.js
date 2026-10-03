@@ -57,7 +57,7 @@ function renderProvinceSituation() {
   const totalAffected = summary?.total_affected_provinces ?? (critical.length + watch.length);
 
   setText("provincePanelTitle", `จว.ประสบอุทกภัย ${totalAffected} จังหวัด`);
-  setText("provinceMapSummary", `ประสบอุทกภัย ${totalAffected} จังหวัด · วิกฤต ${critical.length} จังหวัด · เฝ้าระวัง ${watch.length} จังหวัด`);
+  setText("provinceMapSummary", `ประสบอุทกภัย ${totalAffected} จังหวัด`);
   renderProvinceStatusMap(critical, watch);
   document.getElementById("provinceAffectedAreas").innerHTML = renderProvinceAreaList([...critical, ...watch], "ไม่พบจังหวัดประสบอุทกภัย");
   renderImpactSummary(summary?.impact_summary);
@@ -155,7 +155,7 @@ function buildDischargeChart(rows) {
   };
 }
 
-const DISCHARGE_COLORS = ["#0f766e", "#b45309", "#2563eb", "#7c3aed", "#dc2626", "#64748b"];
+const DISCHARGE_COLORS = ["#0f766e", "#b45309", "#2563eb", "#7c3aed"];
 
 function renderDischargeChart(chart) {
   const width = 520;

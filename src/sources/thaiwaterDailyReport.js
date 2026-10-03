@@ -9,9 +9,7 @@ const HISTORY_STATIONS = {
   "Ct.19": "แม่น้ำสะแกกรัง",
   "C.13": "เขื่อนเจ้าพระยา",
   "S.5": "แม่น้ำป่าสัก",
-  "C29A": "บางไทร",
-  "ปตร.พลเทพ": "ปตร.พลเทพ",
-  "ปตร.มโนรมย์": "ปตร.มโนรมย์"
+  "C29A": "บางไทร"
 };
 const FROZEN_HISTORY = {
   "Ct.19": [
@@ -164,8 +162,6 @@ function stationIdFromCell(cell) {
   if (cell.includes("(C.13)")) return "C.13";
   if (cell.includes("(S.5)")) return "S.5";
   if (cell.includes("(C.29)") || cell.includes("(C.29A)") || cell.includes("บางไทร ปริมาณน้ำเฉลี่ยรายวัน")) return "C29A";
-  if (cell.includes("ปตร.พลเทพ")) return "ปตร.พลเทพ";
-  if (cell.includes("ปตร.มโนรมย์")) return "ปตร.มโนรมย์";
   return null;
 }
 
