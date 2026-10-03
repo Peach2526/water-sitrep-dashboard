@@ -185,7 +185,7 @@ function normalizeRoad(item) {
     fetched_at: item.fetchedAt,
     source_updated_at: item.sourceUpdatedAt ?? SNAPSHOT_UPDATED_AT,
     attribution_text: "Bangkok NOW Flood Alert",
-    is_stale: false,
+    is_stale: item.liveOk ? undefined : true,
     stale_reason: item.liveOk ? null : "ใช้ snapshot จากหน้า NOW เพราะ server อ่านข้อมูลสดไม่ได้"
   });
 }
