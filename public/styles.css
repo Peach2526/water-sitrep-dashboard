@@ -2561,3 +2561,101 @@ td {
     padding: 0.8mm 1mm;
   }
 }
+
+/* Dashboard readability refinements */
+.province-map-composite {
+  grid-template-columns: minmax(390px, 1.08fr) minmax(300px, 0.92fr);
+  gap: 10px;
+}
+
+.province-map-composite .province-status-map svg {
+  height: 500px;
+}
+
+.province-area-summary {
+  margin-top: 10px;
+}
+
+.source-foot {
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.weather-day strong,
+.weather-day small,
+.weather-day em,
+.weather-day .tide-inline {
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.weather-day {
+  row-gap: 1px;
+}
+
+@media (max-width: 1180px) {
+  .province-map-composite {
+    grid-template-columns: 1fr;
+  }
+
+  .province-map-composite .province-status-map svg {
+    height: min(76vh, 660px);
+  }
+}
+
+@media (max-width: 720px) {
+  .weather-panel .section-title {
+    display: flex;
+    align-items: end;
+  }
+
+  .weather-days,
+  .weather-panel .weather-days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .weather-day {
+    min-height: 92px;
+    grid-template-columns: 26px minmax(0, 1fr);
+    padding: 8px;
+  }
+
+  .weather-icon {
+    width: 23px;
+    height: 18px;
+  }
+
+  .weather-day strong {
+    font-size: 13px;
+  }
+
+  .weather-day small,
+  .weather-day em,
+  .weather-day .tide-inline {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .weather-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .weather-summary .tide-source {
+    white-space: normal;
+  }
+}
+
+@media print {
+  .province-map-composite {
+    grid-template-columns: minmax(68mm, 0.72fr) minmax(90mm, 1fr);
+  }
+
+  .province-map-composite .province-status-map svg {
+    height: 61mm;
+  }
+
+  .source-foot {
+    font-size: 6.8px;
+  }
+}

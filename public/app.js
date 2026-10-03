@@ -90,7 +90,10 @@ function renderProvinceStatusMap(criticalRows, watchRows) {
     </svg>
   `;
 
-  document.getElementById("provinceMapSource").innerHTML = renderProvinceSourceFoot([...criticalRows, ...watchRows]);
+  const provinceMapSource = document.getElementById("provinceMapSource");
+  if (provinceMapSource) {
+    provinceMapSource.innerHTML = renderProvinceSourceFoot([...criticalRows, ...watchRows]);
+  }
 }
 
 function renderDischarges() {
