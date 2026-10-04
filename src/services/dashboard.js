@@ -324,7 +324,11 @@ function buildDailyReportStation(stationId, stationName, province, district, his
 
 function buildBangkokPerimeterSummary(stations) {
   const freshStations = stations.filter((station) => !station.is_stale);
-  const bangkokStations = freshStations.filter((station) => station.province === "กรุงเทพฯ" && station.category === "Road Flood");
+  const bangkokStations = freshStations.filter((station) =>
+    station.province === "กรุงเทพฯ" &&
+    station.source_name === "POPNIX Flood" &&
+    station.category !== "Rain"
+  );
   const perimeterStations = freshStations.filter((station) => PERIMETER_PROVINCES.has(station.province));
   const criticalDistricts = groupAreasByKey(bangkokStations, "critical", resolveBangkokDistrict);
   const criticalDistrictNames = new Set(criticalDistricts.map((row) => row.name));

@@ -4,16 +4,18 @@ import { numberOrNull, statusFromSituation, textOrNull, trendFromDelta, withFres
 const BASE_URL = "https://flood.pop.in.th";
 
 export async function collectPopnix() {
-  const [overview, river, rain, roads] = await Promise.all([
+  const [overview, river, rain, roads, districts] = await Promise.all([
     fetchJson(`${BASE_URL}/api_overview.php`),
     fetchJson(`${BASE_URL}/api_river.php`),
     fetchJson(`${BASE_URL}/api_rain.php`),
-    fetchJson(`${BASE_URL}/api_roads.php`)
+    fetchJson(`${BASE_URL}/api_roads.php`),
+    fetchJson(`${BASE_URL}/data/districts.json`)
   ]);
 
   const fetchedAt = new Date().toISOString();
+  const districtOf = buildBangkokDistrictLookup(districts.data);
   const stations = [
-    ...normalizeOverview(overview, fetchedAt),
+    ...normalizeOverview(overview, fetchedAt, districtOf),
     ...normalizeRiver(river, fetchedAt),
     ...normalizeRain(rain, fetchedAt),
     ...normalizeRoads(roads, fetchedAt)
@@ -26,13 +28,13 @@ export async function collectPopnix() {
   };
 }
 
-function normalizeOverview(result, fallbackFetchedAt) {
+function normalizeOverview(result, fallbackFetchedAt, districtOf) {
   if (!result.ok || !Array.isArray(result.data?.stations)) return [];
   return result.data.stations.map((item) => withFreshness({
     station_id: textOrNull(item.id ?? item.code ?? item.oldcode),
     station_name: textOrNull(item.name),
     province: "กรุงเทพฯ",
-    district: textOrNull(item.district),
+    district: textOrNull(item.district) ?? districtOf(numberOrNull(item.lat), numberOrNull(item.lng)),
     latitude: numberOrNull(item.lat),
     longitude: numberOrNull(item.lng),
     water_level: numberOrNull(item.wl),
@@ -171,6 +173,62 @@ function gapFromLevels(item) {
   const waterLevel = numberOrNull(item.wl);
   const bankLevel = numberOrNull(item.bank);
   return waterLevel !== null && bankLevel !== null ? waterLevel - bankLevel : null;
+}
+
+function buildBangkokDistrictLookup(districtData) {
+  const projection = districtData?.p;
+  const districts = Array.isArray(districtData?.d) ? districtData.d.map((district) => ({
+    name: textOrNull(district.th),
+    rings: Array.isArray(district.r) ? district.r.filter(Array.isArray) : []
+  })).filter((district) => district.name && district.rings.length) : [];
+
+  if (!projection || !Number.isFinite(projection.lng0) || !Number.isFinite(projection.lat0) ||
+      !Number.isFinite(projection.kx) || !Number.isFinite(projection.ky) || !districts.length) {
+    return () => null;
+  }
+
+  const prepared = districts.map((district) => ({
+    ...district,
+    bounds: ringBounds(district.rings)
+  }));
+
+  return (lat, lng) => {
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    const x = (lng - projection.lng0) * projection.kx;
+    const y = (projection.lat0 - lat) * projection.ky;
+
+    for (const district of prepared) {
+      const [minX, minY, maxX, maxY] = district.bounds;
+      if (x < minX || x > maxX || y < minY || y > maxY) continue;
+      if (district.rings.some((ring) => inRing(x, y, ring))) return district.name;
+    }
+    return null;
+  };
+}
+
+function ringBounds(rings) {
+  const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const ring of rings) {
+    for (let index = 0; index < ring.length; index += 2) {
+      bounds[0] = Math.min(bounds[0], ring[index]);
+      bounds[1] = Math.min(bounds[1], ring[index + 1]);
+      bounds[2] = Math.max(bounds[2], ring[index]);
+      bounds[3] = Math.max(bounds[3], ring[index + 1]);
+    }
+  }
+  return bounds;
+}
+
+function inRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
+    const xi = ring[i];
+    const yi = ring[i + 1];
+    const xj = ring[j];
+    const yj = ring[j + 1];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
 function buildSourceSummary(name, url, results) {
