@@ -1,10 +1,12 @@
+import { readFileSync } from "node:fs";
 import { fetchJson, fetchTextHead } from "../services/http.js";
 import { withFreshness } from "../services/normalize.js";
 
 const CMS_URL = "https://direct.disaster.go.th/directing/cms?id=8728";
 const CATALOG_SEARCH_URL = "https://catalog.disaster.go.th/api/3/action/package_search?q=%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99%E0%B8%A0%E0%B8%B1%E0%B8%A2&rows=5";
 const DDPM_REPORT_STALE_HOURS = 18;
-const LATEST_REPORT = {
+const MANUAL_REPORT_URL = new URL("../../data/ddpm-manual-report.json", import.meta.url);
+const DEFAULT_REPORT = {
   id: "165403",
   title: "รายงานสถานการณ์สาธารณภัย วันที่ 3 ต.ค เวลา 06.00 น.",
   url: "https://direct.disaster.go.th/directing/cms?id=8728",
@@ -54,6 +56,7 @@ const LATEST_REPORT = {
     "สตูล", "กรุงเทพมหานคร"
   ]
 };
+const LATEST_REPORT = loadManualReport() ?? DEFAULT_REPORT;
 
 export async function collectDdpm() {
   const [cms, catalog] = await Promise.all([
@@ -104,7 +107,7 @@ function buildDdpmProvinceSituation() {
     critical: provinceRows.filter((row) => row.status === "critical"),
     watch: provinceRows.filter((row) => row.status === "watch"),
     normal: [],
-    total_affected_provinces: 23,
+    total_affected_provinces: LATEST_REPORT.total_affected_provinces ?? provinceRows.length,
     source_name: "กรมป้องกันและบรรเทาสาธารณภัย",
     source_url: LATEST_REPORT.file_url,
     source_updated_at: LATEST_REPORT.source_updated_at,
@@ -227,4 +230,26 @@ function toIso(value) {
   if (!value) return null;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+}
+
+function loadManualReport() {
+  try {
+    const raw = readFileSync(MANUAL_REPORT_URL, "utf8");
+    const data = JSON.parse(raw);
+    if (!data?.enabled) return null;
+    return {
+      ...DEFAULT_REPORT,
+      ...data,
+      url: data.url ?? DEFAULT_REPORT.url,
+      file_url: data.file_url ?? DEFAULT_REPORT.file_url,
+      current_details: Array.isArray(data.current_details) && data.current_details.length
+        ? data.current_details
+        : DEFAULT_REPORT.current_details,
+      affected_provinces: Array.isArray(data.affected_provinces) && data.affected_provinces.length
+        ? data.affected_provinces
+        : DEFAULT_REPORT.affected_provinces
+    };
+  } catch {
+    return null;
+  }
 }

@@ -261,16 +261,11 @@ function renderDischargeSourceFoot(rows) {
       sources.set(record.source_name, record.source_url ?? null);
     }
   }
-  const latest = records
-    .map((record) => record.source_updated_at ?? record.observed_at ?? record.fetched_at)
-    .filter(Boolean)
-    .sort()
-    .at(-1);
   const sourceText = [...sources.entries()].map(([name, url]) => {
     const safeName = escapeHtml(name);
     return url ? `<a href="${escapeAttr(url)}" target="_blank" rel="noreferrer">${safeName}</a>` : safeName;
   }).join(", ");
-  return `ที่มา: ${sourceText || "-"}, ${formatCompactDateTime(latest)}`;
+  return `ที่มา: ${sourceText || "-"}`;
 }
 
 function renderWeather() {
@@ -316,7 +311,7 @@ function tideLevelClass(value) {
 function renderTideSourceFoot(tide) {
   if (!tide?.source_name) return "ที่มา: น้ำทะเลหนุน -";
   const name = renderSourceName(tide);
-  return `ที่มา: ${name}, ${formatCompactDateOnly(tide.source_updated_at ?? tide.fetched_at)} · สถานีตรวจวัดระดับน้ำป้อมพระจุลจอมเกล้า`;
+  return `ที่มา: ${name} · สถานีตรวจวัดระดับน้ำป้อมพระจุลจอมเกล้า`;
 }
 
 function weatherIconClass(rainPercent) {
@@ -530,18 +525,13 @@ function renderProvinceSourceFoot(rows) {
   const officialRecords = records.filter((record) => record.source_name === "กรมป้องกันและบรรเทาสาธารณภัย");
   const primaryRecords = officialRecords.length ? officialRecords : records;
   const firstOfficial = primaryRecords[0];
-  const latest = primaryRecords
-    .map((record) => record.source_updated_at ?? record.observed_at ?? record.fetched_at)
-    .filter(Boolean)
-    .sort()
-    .at(-1);
   const staleText = firstOfficial?.is_stale ? " · รายงานล่าสุดที่ระบบโหลดได้" : "";
-  return `ที่มา: ${renderSourceName(firstOfficial)}, ${formatCompactDateTime(latest)}${staleText}`;
+  return `ที่มา: ${renderSourceName(firstOfficial)}${staleText}`;
 }
 
 function renderEvidenceFoot(station) {
   if (!station) return "ที่มา: -";
-  return `ที่มา: ${renderSourceName(station)}, ${formatCompactDateTime(station.source_updated_at ?? station.observed_at ?? station.fetched_at)}`;
+  return `ที่มา: ${renderSourceName(station)}`;
 }
 
 function renderSourceName(record) {

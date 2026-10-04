@@ -1,0 +1,13 @@
+{
+  "enabled": false,
+  "title": "รายงานสถานการณ์สาธารณภัย ใส่ข้อมูลเอง",
+  "file_url": "https://direct.disaster.go.th/directing/cms?id=8728",
+  "source_updated_at": "2026-10-04T06:00:00+07:00",
+  "total_affected_provinces": 23,
+  "affected_households": 0,
+  "affected_people": 0,
+  "deaths": 0,
+  "current_details": [
+    ["ชื่อจังหวัด", "rising", 0, 0, ["ชื่ออำเภอ 1", "ชื่ออำเภอ 2"]]
+  ]
+}
