@@ -3,6 +3,7 @@ import { withFreshness } from "../services/normalize.js";
 
 const CMS_URL = "https://direct.disaster.go.th/directing/cms?id=8728";
 const CATALOG_SEARCH_URL = "https://catalog.disaster.go.th/api/3/action/package_search?q=%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99%E0%B8%A0%E0%B8%B1%E0%B8%A2&rows=5";
+const DDPM_REPORT_STALE_HOURS = 18;
 const LATEST_REPORT = {
   id: "165403",
   title: "รายงานสถานการณ์สาธารณภัย วันที่ 3 ต.ค เวลา 06.00 น.",
@@ -65,6 +66,8 @@ export async function collectDdpm() {
     ...normalizeCatalog(catalog)
   ].filter(Boolean);
 
+  const provinceSituation = buildDdpmProvinceSituation();
+
   return {
     source: {
       name: "กรมป้องกันและบรรเทาสาธารณภัย",
@@ -72,21 +75,29 @@ export async function collectDdpm() {
       type: "report",
       ok: cms.ok || catalog.ok,
       fetched_at: new Date().toISOString(),
-      source_updated_at: null,
-      error: cms.ok || catalog.ok ? null : [cms.error, catalog.error].filter(Boolean).join("; ")
+      source_updated_at: LATEST_REPORT.source_updated_at,
+      error: cms.ok || catalog.ok ? provinceSituation.stale_reason : [cms.error, catalog.error].filter(Boolean).join("; "),
+      is_stale: provinceSituation.is_stale,
+      stale_reason: provinceSituation.stale_reason
     },
     stations: [],
     alerts,
-    province_situation: buildDdpmProvinceSituation()
+    province_situation: provinceSituation
   };
 }
 
 function buildDdpmProvinceSituation() {
+  const isStale = isReportStale(LATEST_REPORT.source_updated_at);
+  const staleReason = isStale
+    ? "ระบบยังไม่สามารถอ่านรายงาน ปภ. ฉบับใหม่จากหน้าเว็บต้นทางได้ จึงใช้รายงานล่าสุดที่ระบบมีลิงก์ไฟล์ทางการ"
+    : null;
   const currentRows = LATEST_REPORT.current_details.map(([province, trend, households, deaths, districts]) => buildProvinceRow(province, trend === "rising" ? "critical" : "watch", {
     trend,
     households,
     deaths,
-    districts
+    districts,
+    isStale,
+    staleReason
   }));
   const provinceRows = currentRows.filter((row) => row.province !== "กรุงเทพมหานคร");
   return {
@@ -97,10 +108,18 @@ function buildDdpmProvinceSituation() {
     source_name: "กรมป้องกันและบรรเทาสาธารณภัย",
     source_url: LATEST_REPORT.file_url,
     source_updated_at: LATEST_REPORT.source_updated_at,
+    report_title: LATEST_REPORT.title,
+    is_stale: isStale,
+    stale_reason: staleReason,
     impact_summary: {
       affected_households: LATEST_REPORT.affected_households,
       affected_people: LATEST_REPORT.affected_people,
       deaths: LATEST_REPORT.deaths,
+      source_name: "กรมป้องกันและบรรเทาสาธารณภัย",
+      source_url: LATEST_REPORT.file_url,
+      source_updated_at: LATEST_REPORT.source_updated_at,
+      is_stale: isStale,
+      stale_reason: staleReason,
       top_affected_households: currentRows
         .filter((row) => Number.isFinite(row.affected_households) && row.affected_households > 0)
         .sort((a, b) => b.affected_households - a.affected_households)
@@ -129,7 +148,9 @@ function buildProvinceRow(province, status, details = {}) {
     observed_at: LATEST_REPORT.source_updated_at,
     fetched_at: new Date().toISOString(),
     source_updated_at: LATEST_REPORT.source_updated_at,
-    attribution_text: LATEST_REPORT.title
+    attribution_text: LATEST_REPORT.title,
+    is_stale: details.isStale ?? false,
+    stale_reason: details.staleReason ?? null
   };
   return {
     province,
@@ -142,9 +163,17 @@ function buildProvinceRow(province, status, details = {}) {
     districts: details.districts ?? [],
     affected_households: details.households ?? null,
     deaths: details.deaths ?? null,
+    is_stale: details.isStale ?? false,
+    stale_reason: details.staleReason ?? null,
     stations: [station],
     evidence: station
   };
+}
+
+function isReportStale(sourceUpdatedAt) {
+  const observed = Date.parse(sourceUpdatedAt);
+  if (!Number.isFinite(observed)) return true;
+  return Date.now() - observed > DDPM_REPORT_STALE_HOURS * 60 * 60 * 1000;
 }
 
 function waterTrendText(trend) {

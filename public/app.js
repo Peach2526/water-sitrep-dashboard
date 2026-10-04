@@ -30,13 +30,20 @@ async function loadDashboard({ force = false } = {}) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     state.data = await response.json();
     renderDashboard();
-    showToast(state.data.cache?.served_from_cache ? "ใช้ข้อมูลจาก cache เพื่อลดการเรียกเว็บต้นทาง" : "ดึงข้อมูลล่าสุดแล้ว");
+    showToast(refreshMessage());
   } catch (error) {
     showToast(`โหลดข้อมูลไม่ได้: ${error.message}`);
   } finally {
     button.disabled = false;
     button.innerHTML = '<span aria-hidden="true">↻</span> รีเฟรชข้อมูล';
   }
+}
+
+function refreshMessage() {
+  if (state.data.cache?.served_from_cache) return "ใช้ข้อมูลจาก cache เพื่อลดการเรียกเว็บต้นทาง";
+  const provinceSituation = state.data.executive_summary?.province_situation;
+  if (provinceSituation?.is_stale) return "รีเฟรชแล้ว: บางแหล่งอัปเดตสด แต่รายงาน ปภ. ยังเป็นฉบับล่าสุดที่ระบบโหลดได้";
+  return "ดึงข้อมูลล่าสุดแล้ว";
 }
 
 function renderDashboard() {
@@ -468,6 +475,9 @@ function renderImpactSummary(summary) {
     container.innerHTML = `<p class="note">ยังไม่พบยอดผลกระทบรวมจากรายงาน ปภ.</p>`;
     return;
   }
+  const staleNote = summary.is_stale
+    ? `<small class="stale-source-note">รายงานล่าสุดที่ระบบโหลดได้: ${formatCompactDateTime(summary.source_updated_at)}</small>`
+    : "";
 
   container.innerHTML = `
     <div class="impact-grid">
@@ -476,11 +486,13 @@ function renderImpactSummary(summary) {
         <strong>${formatNumber(summary.affected_households)} ครัวเรือน</strong>
         <small>${formatNumber(summary.affected_people)} คน</small>
         <small>${formatTopAffectedHouseholds(summary.top_affected_households)}</small>
+        ${staleNote}
       </div>
       <div>
         <span>ผู้เสียชีวิต</span>
         <strong>${formatNumber(summary.deaths)} ราย</strong>
         <small>${formatDeathDetails(summary.death_details)}</small>
+        ${staleNote}
       </div>
     </div>
   `;
@@ -515,22 +527,16 @@ function renderBulletSource(rows) {
 function renderProvinceSourceFoot(rows) {
   const records = rows.flatMap((row) => [row.evidence, ...(row.stations ?? []), ...(row.overbank_stations ?? [])]).filter(Boolean);
   if (!records.length) return "ที่มา: -";
-  const sources = new Map();
-  for (const record of records) {
-    const name = record.source_name;
-    if (!name || sources.has(name)) continue;
-    sources.set(name, record.source_url ?? null);
-  }
-  const latest = records
+  const officialRecords = records.filter((record) => record.source_name === "กรมป้องกันและบรรเทาสาธารณภัย");
+  const primaryRecords = officialRecords.length ? officialRecords : records;
+  const firstOfficial = primaryRecords[0];
+  const latest = primaryRecords
     .map((record) => record.source_updated_at ?? record.observed_at ?? record.fetched_at)
     .filter(Boolean)
     .sort()
     .at(-1);
-  const sourceText = [...sources.entries()].map(([name, url]) => {
-    const safeName = escapeHtml(name);
-    return url ? `<a href="${escapeAttr(url)}" target="_blank" rel="noreferrer">${safeName}</a>` : safeName;
-  }).join(", ");
-  return `ที่มา: ${sourceText || "-"}, ${formatCompactDateTime(latest)}`;
+  const staleText = firstOfficial?.is_stale ? " · รายงานล่าสุดที่ระบบโหลดได้" : "";
+  return `ที่มา: ${renderSourceName(firstOfficial)}, ${formatCompactDateTime(latest)}${staleText}`;
 }
 
 function renderEvidenceFoot(station) {

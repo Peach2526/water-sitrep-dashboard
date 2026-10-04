@@ -646,6 +646,12 @@ body.pdf-export-hq main {
   line-height: 1.2;
 }
 
+.impact-grid .stale-source-note {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.15;
+}
+
 .river-line {
   fill: none;
   stroke: #7ab0ca;
